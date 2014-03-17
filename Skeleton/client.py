@@ -4,9 +4,10 @@ KTN-project 2013 / 2014
 import socket
 import json
 from MessageWorker import ReceiveMessageWorker
+from datetime import datetime
 
 SERVERHOST = 'localhost'
-SERVERPORT = 24602
+SERVERPORT = 24601
 
 class Client(object):
 
@@ -21,8 +22,26 @@ class Client(object):
             userInput = raw_input('')
             self.send(userInput)
 
+    def printMessage(self, messageDict):
+        print messageDict['username'] + " @ " + messageDict["timestamp"] + ": " + messageDict["message"]
+
     def message_received(self, message, connection):
-        print message
+        decodedMessage = json.loads(message)
+        try:
+            error = decodedMessage['error']
+            print "SERVER ERROR: " + error
+        except KeyError:
+            response = decodedMessage['response']
+            if response == 'login':
+                print 'Successfully logged in as "%s"' % decodedMessage['username']
+                # Some logic should be here and give the user the backlog of messages
+            elif response == "logout":
+                print 'Successfully logged out from "%s"' % decodedMessage['username']
+            elif response == 'message':
+                self.printMessage(decodedMessage)
+            else:  
+                print 'LOCAL ERROR: Server response not recognized'
+
 
     def connection_closed(self, connection):
         self.connected = False
@@ -38,10 +57,12 @@ class Client(object):
                     data = data [1:] # Strips the string of the slash
                     splitData = data.split(' ', 1) # splits out the command
                     keyword = splitData[0].lower()
-                    arguments = splitData[1]
-                    
                     if keyword == 'login':
-                        messageDict = {"request":"login", "username":arguments}
+                        try:
+                            messageDict = {"request":"login", "username":splitData[1]}
+                        except IndexError:
+                            print "ERROR: No username found"
+                            return
                     elif keyword == 'logout':
                         messageDict = {"request":"logout"}
                 else:
@@ -49,7 +70,8 @@ class Client(object):
                     return
             else:
                 # Send a pure message
-                messageDict = {"request":"message", "message":data}
+                timestamp = datetime.now().strftime("%H:%M:%S")
+                messageDict = {"request":"message", "message":data, "timestamp":timestamp}
 
             requestAsJSON = json.dumps(messageDict)
             self.connection.sendall(requestAsJSON)

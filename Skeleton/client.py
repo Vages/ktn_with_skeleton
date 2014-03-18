@@ -16,6 +16,8 @@ class Client(object):
 
     def start(self, host, port):
         self.connection.connect((host, port))
+        print '\nWelcome to KTN chat; your session is ready. \
+            \n(Type "/help" and press enter for a list of commands.)\n'
         self.messageWorker = ReceiveMessageWorker(self, self.connection)
         self.messageWorker.start()
         while True:
@@ -66,9 +68,9 @@ class Client(object):
                     elif keyword == 'logout':
                         messageDict = {"request":"logout"}
                     elif keyword == 'help':
-                        print 'HELP:\n\tType "/login <your username>" and press enter to log in to the server. \
-                        \n\tType "/logout" to log out of a chatting session\
-                        \n\tWhen logged in, type a message. Pressing enter will send it to all other logged in clients.'
+                        print '\nHELP:\n(1) Type "/login <your username>" and press enter to log in to the server. \
+                            \n(2) Type "/logout" to log out of a chatting session\
+                            \n(3) Type a normal message and press enter to send it to all other logged in clients.\n'
                         return
                     else:
                         print 'ERROR: Command not recognized. \n\tType "/help" for a list of available commands.'

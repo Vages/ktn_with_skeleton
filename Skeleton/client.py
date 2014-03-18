@@ -74,7 +74,7 @@ class Client(object):
                     elif keyword == 'logout':
                         requestDict = {"request":"logout"}
                     elif keyword == 'help':
-                        print '\nHELP:\n(1) Type "/login <your username>" and press enter to log in to the server. \
+                        print '\nHELP:\n(1) Type "/login <your username>" and press enter to log in to the server.\
                             \n(2) Type "/logout" to log out of a chatting session\
                             \n(3) Type a normal message and press enter to send it to all other logged in clients.\n'
                         return

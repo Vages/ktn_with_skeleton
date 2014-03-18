@@ -50,7 +50,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                             errorMessage = {"response":"login", 'error':'Name already taken.', 'username':attemptedUsername}
                             self.sendMessage(json.dumps(errorMessage))
                         else:
-                            if re.match("^[0-9A-Za-z_\-]{3,10}$", attemptedUsername):
+                            if re.match("^[0-9A-Za-z_]{3,10}$", attemptedUsername):
                                 # Username must be 3-10 chars long and consist of only alphanumeric characters
                                 self.username = decodedData["username"]
                                 self.loggedIn = True

@@ -6,9 +6,6 @@ import json
 from MessageWorker import ReceiveMessageWorker
 from datetime import datetime
 
-SERVERHOST = 'localhost'
-SERVERPORT = 24601
-
 class Client(object):
 
     def __init__(self):
@@ -16,57 +13,66 @@ class Client(object):
 
     def start(self, host, port):
         self.connection.connect((host, port))
-        print '\nWelcome to KTN chat; your session is ready. \
-            \n(Type "/help" and press enter for a list of commands.)\n'
         self.messageWorker = ReceiveMessageWorker(self, self.connection)
         self.messageWorker.start()
+
+        # Give user welcome message
+        print '\nWelcome to KTN chat; you may now login with "/login <your username>". \
+            \n(Type "/help" and press enter for a list of commands.)\n'
+        
         while True:
             userInput = raw_input('')
             self.send(userInput)
 
     def printMessage(self, messageDict):
+        # Print received message with timestamp
         print messageDict['username'] + " @ " + messageDict["timestamp"] + ": " + messageDict["message"]
 
     def message_received(self, message, connection):
         decodedMessage = json.loads(message)
         try:
-            error = decodedMessage['error']
+            error = decodedMessage['error'] # Print an error if present
             print "SERVER ERROR: " + error
         except KeyError:
-            response = decodedMessage['response']
+            response = decodedMessage['response'] # Determine action from service response
             if response == 'login':
-                print 'Successfully logged in as "%s"' % decodedMessage['username']
-                # Some logic should be here and give the user the backlog of messages
+                # print 'Successfully logged in as "%s"' % decodedMessage['username']
+                for message in decodedMessage["messages"]:
+                    self.printMessage(message)
             elif response == "logout":
                 print 'Successfully logged out from "%s"' % decodedMessage['username']
             elif response == 'message':
                 self.printMessage(decodedMessage)
+            elif response == 'notification':
+                self.print_notification(decodedMessage)
             else:  
                 print 'LOCAL ERROR: Server response not recognized'
 
+    def print_notification(self, messageDict):
+        print messageDict["message"]
 
     def connection_closed(self, connection):
         self.connected = False
 
     def send(self, data):
-        # check that data is not empty
-        if data != '':
-            # A slash indicates that the program starts with a command            
-            if data[0] == '/':
-                # The data has a command
-                if len(data) > 1:
+        
+        if data != '': # Check if data is empty
+
+            if data[0] == '/': # Data is a command
+
+                if len(data) > 1: # Check if command keyword is present
                     
-                    data = data [1:] # Strips the string of the slash
-                    splitData = data.split(' ', 1) # splits out the command
+                    data = data [1:] # Strip the string of the slash
+                    splitData = data.split(' ', 1) # Split the keyword from potential arguments
                     keyword = splitData[0].lower()
                     if keyword == 'login':
                         try:
-                            messageDict = {"request":"login", "username":splitData[1]}
+                            requestDict = {"request":"login", "username":splitData[1]}
                         except IndexError:
                             print "ERROR: No username found"
                             return
                     elif keyword == 'logout':
-                        messageDict = {"request":"logout"}
+                        requestDict = {"request":"logout"}
                     elif keyword == 'help':
                         print '\nHELP:\n(1) Type "/login <your username>" and press enter to log in to the server. \
                             \n(2) Type "/logout" to log out of a chatting session\
@@ -79,11 +85,10 @@ class Client(object):
                     print "ERROR: No keyword found"
                     return
             else:
-                # Send a pure message
-                timestamp = datetime.now().strftime("%H:%M:%S")
-                messageDict = {"request":"message", "message":data, "timestamp":timestamp}
+                timestamp = datetime.now().strftime("%H:%M:%S") # Create timestamp for message
+                requestDict = {"request":"message", "message":data, "timestamp":timestamp}
 
-            requestAsJSON = json.dumps(messageDict)
+            requestAsJSON = json.dumps(requestDict)
             self.connection.sendall(requestAsJSON)
 
     def force_disconnect(self):
@@ -92,5 +97,7 @@ class Client(object):
 
 
 if __name__ == "__main__":
+    SERVERHOST = 'localhost'
+    SERVERPORT = 24601
     client = Client()
     client.start(SERVERHOST, SERVERPORT)

@@ -12,6 +12,7 @@ class Client(object):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def start(self, host, port):
+        self.chatRunning = True
         self.connection.connect((host, port))
         self.messageWorker = ReceiveMessageWorker(self, self.connection)
         self.messageWorker.start()
@@ -20,7 +21,7 @@ class Client(object):
         print '\nWelcome to KTN chat; you may now login with "/login <your username>". \
             \n(Type "/help" and press enter for a list of commands.)\n'
         
-        while True:
+        while self.chatRunning:
             userInput = raw_input('')
             self.send(userInput)
 
@@ -41,6 +42,7 @@ class Client(object):
                     self.printMessage(message)
             elif response == "logout":
                 print 'Successfully logged out from "%s"' % decodedMessage['username']
+                
             elif response == 'message':
                 self.printMessage(decodedMessage)
             elif response == 'notification':

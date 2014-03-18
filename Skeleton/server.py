@@ -46,7 +46,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 else:
                     if request == "login":
                         attemptedUsername = decodedData["username"]
-                        if attemptedUsername in server.connectedClients: # Check if username already taken
+                        if attemptedUsername in server.getConnectedUsernames(): # Check if username already taken
                             errorMessage = {"response":"login", 'error':'Name already taken.', 'username':attemptedUsername}
                             self.sendMessage(json.dumps(errorMessage))
                         else:
@@ -85,6 +85,12 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     def createClientListAndLog(self):
         self.connectedClients = []
         self.log = []
+
+    def getConnectedUsernames(self):
+        nameList = []
+        for client in self.connectedClients:
+            nameList.append(client.username) 
+        return nameList
 
     def broadcastMessage(self, message, clientHandler):
         # Pushes a message to the log and sends it to all logged in cliens

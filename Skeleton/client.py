@@ -65,6 +65,14 @@ class Client(object):
                             return
                     elif keyword == 'logout':
                         messageDict = {"request":"logout"}
+                    elif keyword == 'help':
+                        print 'HELP:\n\tType "/login <your username>" and press enter to log in to the server. \
+                        \n\tType "/logout" to log out of a chatting session\
+                        \n\tWhen logged in, type a message. Pressing enter will send it to all other logged in clients.'
+                        return
+                    else:
+                        print 'ERROR: Command not recognized. \n\tType "/help" for a list of available commands.'
+                        return
                 else:
                     print "ERROR: No keyword found"
                     return

@@ -61,16 +61,16 @@ class Client(object):
                 if len(data) > 1: # Check if command keyword is present
                     
                     data = data [1:] # Strip the string of the slash
-                    splitData = data.split(' ', 1) # Split the keyword from potential arguments
-                    keyword = splitData[0].lower()
+                    split_data = data.split(' ', 1) # Split the keyword from potential arguments
+                    keyword = split_data[0].lower()
                     if keyword == 'login':
                         try:
-                            requestDict = {"request":"login", "username":splitData[1]}
+                            request_dict = {"request":"login", "username":split_data[1]}
                         except IndexError:
                             print "ERROR: No username found"
                             return
                     elif keyword == 'logout':
-                        requestDict = {"request":"logout"}
+                        request_dict = {"request":"logout"}
                     elif keyword == 'help':
                         print '\nHELP:\n(1) Type "/login <your username>" and press enter to log in to the server.\
                             \n(2) Type "/logout" to log out of a chatting session\
@@ -84,9 +84,9 @@ class Client(object):
                     return
             else:
                 timestamp = datetime.now().strftime("%H:%M:%S") # Create timestamp for message
-                requestDict = {"request":"message", "message":data, "timestamp":timestamp}
+                request_dict = {"request": "message", "message": data, "timestamp": timestamp}
 
-            request_as_json = json.dumps(requestDict)
+            request_as_json = json.dumps(request_dict)
             self.connection.sendall(request_as_json)
 
     def force_disconnect(self):

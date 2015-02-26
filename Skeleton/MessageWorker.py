@@ -17,18 +17,17 @@ from threading import Thread
 
 
 class ReceiveMessageWorker(Thread):
-
     def __init__(self, listener, connection):
-    	Thread.__init__(self)
-    	# Set Daemon flag to prevent it running forever
-        self.daemon = True 
+        Thread.__init__(self)
+        # Set Daemon flag to prevent it running forever
+        self.daemon = True
 
-        self.listener = listener # Set listener object
-        self.connection = connection # Set connected socket
+        self.listener = listener  # Set listener object
+        self.connection = connection  # Set connected socket
 
     def run(self):
-    	# Continually listen for messages on the connected socket
-    	while True:
-    		# When message is received, call listener's message_received-method
-	    	message = self.connection.recv(4096).strip()
-	    	self.listener.message_received(message, self.connection)
+        # Continually listen for messages on the connected socket
+        while True:
+            # When message is received, call listener's message_received-method
+            message = self.connection.recv(4096).strip()
+            self.listener.message_received(message, self.connection)

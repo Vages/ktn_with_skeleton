@@ -29,16 +29,16 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.listening = True
 
         # New client set to not logged in
-        self.loggedIn = False 
+        self.logged_in = False
         while self.listening:
             data = self.connection.recv(4096).strip()
             if data:
                 decoded_data = json.loads(data) # Decode data from JSON
                 request = decoded_data["request"] # Check user action
-                if self.loggedIn:
+                if self.logged_in:
                     if request == "login":
-                        errorMessage = {'response':'login', 'error':'Already logged in'}
-                        self.sendMessage(json.dumps(errorMessage))
+                        error_message = {'response':'login', 'error':'Already logged in'}
+                        self.send_message(json.dumps(error_message))
                     elif request == "logout":
                         self.logout()
                     elif request == "message":
@@ -47,41 +47,41 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                     if request == "login":
                         attemptedUsername = decoded_data["username"]
                         if attemptedUsername in server.get_connected_user_names(): # Check if username already taken
-                            errorMessage = {"response":"login", 'error':'Name already taken.', 'username':attemptedUsername}
-                            self.sendMessage(json.dumps(errorMessage))
+                            error_message = {"response":"login", 'error':'Name already taken.', 'username':attemptedUsername}
+                            self.send_message(json.dumps(error_message))
                         else:
                             if re.match("^[0-9A-Za-z_]{3,10}$", attemptedUsername):
                                 # Username must be 3-10 chars long and consist of only alphanumeric characters
                                 self.username = decoded_data["username"]
-                                self.loggedIn = True
+                                self.logged_in = True
                                 self.server.add_logged_in_client(self) # Add client to server list of logged in clients
-                                previousMessages = self.server.get_message_backlog() # Get backlog
-                                loginMessage = {"response":"login", "username":self.username, "messages":previousMessages}
-                                self.sendMessage(json.dumps(loginMessage))
+                                previous_messages = self.server.get_message_backlog() # Get backlog
+                                login_message = {"response":"login", "username":self.username, "messages":previous_messages}
+                                self.send_message(json.dumps(login_message))
                             else:
-                                errorMessage = {'response':'login', 'error':'Invalid username.\nMust be 3-10 characters long, alphanumeric with "_" or "-".', 'username':attemptedUsername}
-                                self.sendmessage(json.dumps(errorMessage))
+                                error_message = {'response':'login', 'error':'Invalid username.\nMust be 3-10 characters long, alphanumeric with "_" or "-".', 'username':attemptedUsername}
+                                self.send_message(json.dumps(error_message))
                     elif request == "logout":
-                        errorMessage = {"response":"logout", "error":"Not logged in!"}
-                        self.sendMessage(json.dumps(errorMessage))
+                        error_message = {"response":"logout", "error":"Not logged in!"}
+                        self.send_message(json.dumps(error_message))
                     elif request == "message":
-                        errorMessage = {"response":"message", "error":"You have to log in before sending a message."}
-                        self.sendMessage(json.dumps(errorMessage))
+                        error_message = {"response":"message", "error":"You have to log in before sending a message."}
+                        self.send_message(json.dumps(error_message))
             else:
                 print 'Client disconnected!'
-                if self.loggedIn:
+                if self.logged_in:
                     self.logout()
                 break
 
-    def sendMessage(self, message):
+    def send_message(self, message):
         # Sends a string to the connected client
         self.connection.sendall(message)
 
     def logout(self):
-        self.loggedIn = False
+        self.logged_in = False
         self.server.remove_logged_in_client(self)
-        logoutMessage = {"response":"logout", "username":self.username}
-        self.sendMessage(json.dumps(logoutMessage))
+        logout_message = {"response":"logout", "username":self.username}
+        self.send_message(json.dumps(logout_message))
         #self.listening = False
 
 '''
@@ -111,7 +111,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         self.log.append(message)
         json_dump = json.dumps(message)  # Generates a json dump to send to all logged in clients
         for client in self.connected_clients:
-            client.sendMessage(json_dump)
+            client.send_message(json_dump)
 
     def add_logged_in_client(self, client_handler):
         # Adds a ClientHandler to the current list of logged in clients
@@ -120,7 +120,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         notification = client_handler.username + " has logged in."
         message_dict = {'response': "notification", 'message': notification}
         for client in self.connected_clients:
-            client.sendMessage(json.dumps(message_dict))
+            client.send_message(json.dumps(message_dict))
 
     def remove_logged_in_client(self, client_handler):
         # Removes the current client handler from the list of logged in clients.
@@ -129,7 +129,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         notification = client_handler.username + " has logged out."
         message_dict = {"response": "notification", "message": notification}
         for client in self.connected_clients:
-            client.sendMessage(json.dumps(message_dict))
+            client.send_message(json.dumps(message_dict))
 
     def get_message_backlog(self):
         # Returns the last messages; max 20

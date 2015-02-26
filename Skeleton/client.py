@@ -54,18 +54,18 @@ class Client(object):
 
     def send(self, data):
         
-        if data != '': # Check if data is empty
+        if data != '':  # Check if data is empty
 
-            if data[0] == '/': # Data is a command
+            if data[0] == '/':  # Data is a command
 
-                if len(data) > 1: # Check if command keyword is present
+                if len(data) > 1:  # Check if command keyword is present
                     
-                    data = data [1:] # Strip the string of the slash
-                    split_data = data.split(' ', 1) # Split the keyword from potential arguments
+                    data = data[1:]  # Strip the string of the slash
+                    split_data = data.split(' ', 1)  # Split the keyword from potential arguments
                     keyword = split_data[0].lower()
                     if keyword == 'login':
                         try:
-                            request_dict = {"request":"login", "username":split_data[1]}
+                            request_dict = {"request": "login", "username": split_data[1]}
                         except IndexError:
                             print "ERROR: No username found"
                             return
@@ -83,7 +83,7 @@ class Client(object):
                     print "ERROR: No keyword found"
                     return
             else:
-                timestamp = datetime.now().strftime("%H:%M:%S") # Create timestamp for message
+                timestamp = datetime.now().strftime("%H:%M:%S")  # Create timestamp for message
                 request_dict = {"request": "message", "message": data, "timestamp": timestamp}
 
             request_as_json = json.dumps(request_dict)

@@ -13,7 +13,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     """
 
     def handle(self):
-        """Overrides superclass' handle method
+        """Overrides superclass' handle method.
 
         :return:
         """
@@ -69,10 +69,19 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 break
 
     def send_message(self, message):
-        # Sends a string to the connected client
+        """Sends a message to connected client
+
+        :param message: The message.
+        :return:
+        """
         self.connection.sendall(message)
 
     def logout(self):
+        """Logs the client out.
+
+        :return:
+        """
+
         self.logged_in = False
         self.server.remove_logged_in_client(self)
         logout_message = {"response":"logout", "username":self.username}
@@ -86,20 +95,39 @@ Very important, otherwise only one client will be served at a time
 
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+    """
+    The server implementation
+    """
 
     def __init__(self, server_address, RequestHandlerClass, bind_and_activate=True):
+        """Initializes a server object with log and connected clients.
+
+        :param server_address: Address tuple
+        :param RequestHandlerClass: Request handler for the TCP server
+        :param bind_and_activate: Keyword parameter
+        :return:
+        """
         SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate=True)
         self.log = []
         self.connected_clients = []
 
     def get_connected_user_names(self):
+        """Makes a list of all connected clients.
+
+        :return: List of connected clients.
+        """
         name_list = []
         for client in self.connected_clients:
             name_list.append(client.username)
         return name_list
 
     def broadcast_message(self, message, client_handler):
-        # Pushes a message to the log and sends it to all logged in clients
+        """Pushes a message to the log and sends it to all logged in clients
+
+        :param message: Message from a client
+        :param client_handler:
+        :return:
+        """
         message.pop("request", None)
         message["response"] = "message"  # Adds a server response header
         message["username"] = client_handler.username  # Stamps it with the current username
@@ -109,17 +137,23 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
             client.send_message(json_dump)
 
     def add_logged_in_client(self, client_handler):
-        # Adds a ClientHandler to the current list of logged in clients
+        """Adds a client handler to the current list of logged in clients
+
+        :param client_handler: A client handler for a connected user
+        :return:
+        """
         self.connected_clients.append(client_handler)
-        # TODO: Send a notification to all logged in clients
         notification = client_handler.username + " has logged in."
         message_dict = {'response': "notification", 'message': notification}
         for client in self.connected_clients:
             client.send_message(json.dumps(message_dict))
 
     def remove_logged_in_client(self, client_handler):
-        # Removes the current client handler from the list of logged in clients.
-        # Used to clean up after logout
+        """Removes the current client handler from the list of logged in clients. Used to clean up after logout
+
+        :param client_handler: Client handler for client in question
+        :return:
+        """
         self.connected_clients.remove(client_handler)
         notification = client_handler.username + " has logged out."
         message_dict = {"response": "notification", "message": notification}
@@ -127,19 +161,19 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
             client.send_message(json.dumps(message_dict))
 
     def get_message_backlog(self):
-        # Returns the last messages; max 20
+        """Returns the last messages; max 20
+
+        :return:
+        """
         return self.log[-20:]
 
 if __name__ == "__main__":
-    # Create the server, binding it to the specified host and port
     HOST = 'localhost'
     PORT = 24601
 
     server = ThreadedTCPServer((HOST, PORT), ClientHandler)
 
-    # Activate the server; this will keep running until you
-    # interrupt the program with Ctrl-C
-    try:
+    try:  # Activate the server; this will keep running until you interrupt the program with Ctrl-C
         server.serve_forever()
     except KeyboardInterrupt:
         print

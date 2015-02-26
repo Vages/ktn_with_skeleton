@@ -68,12 +68,27 @@ class Client(object):
                 print 'LOCAL ERROR: Server response not recognized'
 
     def print_notification(self, message_dict):
+        """Prints a response of the notification type.
+
+        :param message_dict: The message in dict form
+        :return:
+        """
         print message_dict["message"]
 
     def connection_closed(self, connection):
+        """Does the cleanup when connection closes.
+
+        :param connection:
+        :return:
+        """
         self.connected = False
 
     def send(self, data):
+        """Sends a user message.
+
+        :param data:
+        :return:
+        """
         
         if data != '':  # Check if data is empty
 

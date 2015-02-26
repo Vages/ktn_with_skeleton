@@ -26,23 +26,23 @@ class Client(object):
         print message_dict['username'] + " @ " + message_dict["timestamp"] + ": " + message_dict["message"]
 
     def message_received(self, message, connection):
-        decodedMessage = json.loads(message)
+        decoded_message = json.loads(message)
         try:
-            error = decodedMessage['error'] # Print an error if present
+            error = decoded_message['error'] # Print an error if present
             print "SERVER ERROR: " + error
         except KeyError:
-            response = decodedMessage['response'] # Determine action from service response
+            response = decoded_message['response'] # Determine action from service response
             if response == 'login':
-                # print 'Successfully logged in as "%s"' % decodedMessage['username']
-                for message in decodedMessage["messages"]:
+                # print 'Successfully logged in as "%s"' % decoded_message['username']
+                for message in decoded_message["messages"]:
                     self.print_message(message)
             elif response == "logout":
-                print 'Successfully logged out from "%s"' % decodedMessage['username']
+                print 'Successfully logged out from "%s"' % decoded_message['username']
                 
             elif response == 'message':
-                self.print_message(decodedMessage)
+                self.print_message(decoded_message)
             elif response == 'notification':
-                self.print_notification(decodedMessage)
+                self.print_notification(decoded_message)
             else:  
                 print 'LOCAL ERROR: Server response not recognized'
 

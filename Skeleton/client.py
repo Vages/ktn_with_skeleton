@@ -21,9 +21,9 @@ class Client(object):
             userInput = raw_input('')
             self.send(userInput)
 
-    def printMessage(self, messageDict):
+    def print_message(self, message_dict):
         # Print received message with timestamp
-        print messageDict['username'] + " @ " + messageDict["timestamp"] + ": " + messageDict["message"]
+        print message_dict['username'] + " @ " + message_dict["timestamp"] + ": " + message_dict["message"]
 
     def message_received(self, message, connection):
         decodedMessage = json.loads(message)
@@ -35,12 +35,12 @@ class Client(object):
             if response == 'login':
                 # print 'Successfully logged in as "%s"' % decodedMessage['username']
                 for message in decodedMessage["messages"]:
-                    self.printMessage(message)
+                    self.print_message(message)
             elif response == "logout":
                 print 'Successfully logged out from "%s"' % decodedMessage['username']
                 
             elif response == 'message':
-                self.printMessage(decodedMessage)
+                self.print_message(decodedMessage)
             elif response == 'notification':
                 self.print_notification(decodedMessage)
             else:  

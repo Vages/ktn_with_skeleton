@@ -18,8 +18,8 @@ class Client(object):
             \n(Type "/help" and press enter for a list of commands.)\n'
 
         while self.chat_running:
-            userInput = raw_input('')
-            self.send(userInput)
+            user_input = raw_input('')
+            self.send(user_input)
 
     def print_message(self, message_dict):
         # Print received message with timestamp
@@ -46,8 +46,8 @@ class Client(object):
             else:  
                 print 'LOCAL ERROR: Server response not recognized'
 
-    def print_notification(self, messageDict):
-        print messageDict["message"]
+    def print_notification(self, message_dict):
+        print message_dict["message"]
 
     def connection_closed(self, connection):
         self.connected = False

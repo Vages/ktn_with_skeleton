@@ -88,11 +88,6 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.send_message(json.dumps(logout_message))
         #self.listening = False
 
-'''
-This will make all Request handlers being called in its own thread.
-Very important, otherwise only one client will be served at a time
-'''
-
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """

@@ -30,13 +30,12 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         print 'Client connected @' + self.ip + ':' + str(self.port)
         self.listening = True
 
-        # New client set to not logged in
-        self.logged_in = False
+        self.logged_in = False  # New client set to not logged in
         while self.listening:
             data = self.connection.recv(4096).strip()
             if data:
-                decoded_data = json.loads(data) # Decode data from JSON
-                request = decoded_data["request"] # Check user action
+                decoded_data = json.loads(data)  # Decode data from JSON
+                request = decoded_data["request"]  # Check user action
                 if self.logged_in:
                     if request == "login":
                         error_message = {'response': 'login', 'error': 'Already logged in'}
@@ -47,12 +46,12 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                         self.server.broadcast_message(decoded_data, self)
                 else:
                     if request == "login":
-                        attemptedUsername = decoded_data["username"]
-                        if attemptedUsername in server.get_connected_user_names(): # Check if username already taken
-                            error_message = {"response":"login", 'error':'Name already taken.', 'username':attemptedUsername}
+                        attempted_username = decoded_data["username"]
+                        if attempted_username in server.get_connected_user_names():  # Check if username already taken
+                            error_message = {"response": "login", 'error': 'Name already taken.', 'username': attempted_username}
                             self.send_message(json.dumps(error_message))
                         else:
-                            if re.match("^[0-9A-Za-z_]{3,10}$", attemptedUsername):
+                            if re.match("^[0-9A-Za-z_]{3,10}$", attempted_username):
                                 # Username must be 3-10 chars long and consist of only alphanumeric characters
                                 self.username = decoded_data["username"]
                                 self.logged_in = True
@@ -61,7 +60,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                                 login_message = {"response":"login", "username":self.username, "messages":previous_messages}
                                 self.send_message(json.dumps(login_message))
                             else:
-                                error_message = {'response':'login', 'error':'Invalid username.\nMust be 3-10 characters long, alphanumeric with "_" or "-".', 'username':attemptedUsername}
+                                error_message = {'response':'login', 'error':'Invalid username.\nMust be 3-10 characters long, alphanumeric with "_" or "-".', 'username':attempted_username}
                                 self.send_message(json.dumps(error_message))
                     elif request == "logout":
                         error_message = {"response":"logout", "error":"Not logged in!"}

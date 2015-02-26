@@ -43,7 +43,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                     elif request == "logout":
                         self.logout()
                     elif request == "message":
-                        self.server.broadcastMessage(decoded_data, self)
+                        self.server.broadcast_message(decoded_data, self)
                 else:
                     if request == "login":
                         attemptedUsername = decoded_data["username"]
@@ -55,7 +55,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                                 # Username must be 3-10 chars long and consist of only alphanumeric characters
                                 self.username = decoded_data["username"]
                                 self.loggedIn = True
-                                self.server.addLoggedInClient(self) # Add client to server list of logged in clients
+                                self.server.add_logged_in_client(self) # Add client to server list of logged in clients
                                 previousMessages = self.server.get_message_backlog() # Get backlog
                                 loginMessage = {"response":"login", "username":self.username, "messages":previousMessages}
                                 self.sendMessage(json.dumps(loginMessage))
@@ -96,42 +96,41 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     def __init__(self, server_address, RequestHandlerClass, bind_and_activate=True):
         SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate=True)
         self.log = []
-        self.connectedClients = []
+        self.connected_clients = []
 
     def get_connected_user_names(self):
-        nameList = []
-        for client in self.connectedClients:
-            nameList.append(client.username) 
-        return nameList
+        name_list = []
+        for client in self.connected_clients:
+            name_list.append(client.username)
+        return name_list
 
-    def broadcastMessage(self, message, clientHandler):
-        # Pushes a message to the log and sends it to all logged in cliens
+    def broadcast_message(self, message, client_handler):
+        # Pushes a message to the log and sends it to all logged in clients
         message.pop("request", None)
-        message["response"] = "message" # Adds a server response header
-        message["username"] = clientHandler.username # Stamps it with the current username
+        message["response"] = "message"  # Adds a server response header
+        message["username"] = client_handler.username  # Stamps it with the current username
         self.log.append(message)
-        jsonDump = json.dumps(message) # Generates a json dump to send to all logged in clients
-        for client in self.connectedClients:
-            client.sendMessage(jsonDump)
+        json_dump = json.dumps(message)  # Generates a json dump to send to all logged in clients
+        for client in self.connected_clients:
+            client.sendMessage(json_dump)
 
-    def addLoggedInClient(self, client_handler):
+    def add_logged_in_client(self, client_handler):
         # Adds a ClientHandler to the current list of logged in clients
-        self.connectedClients.append(client_handler)
+        self.connected_clients.append(client_handler)
         # TODO: Send a notification to all logged in clients
         notification = client_handler.username + " has logged in."
-        message_dict = {"response": "notification", "message": notification}
-        for client in self.connectedClients:
+        message_dict = {'response': "notification", 'message': notification}
+        for client in self.connected_clients:
             client.sendMessage(json.dumps(message_dict))
 
-
-    def remove_logged_in_client(self, clientHandler):
+    def remove_logged_in_client(self, client_handler):
         # Removes the current client handler from the list of logged in clients.
         # Used to clean up after logout
-        self.connectedClients.remove(clientHandler)
-        notification = clientHandler.username + " has logged out."
-        messageDict = {"response":"notification", "message":notification}
-        for client in self.connectedClients:
-            client.sendMessage(json.dumps(messageDict))
+        self.connected_clients.remove(client_handler)
+        notification = client_handler.username + " has logged out."
+        message_dict = {"response": "notification", "message": notification}
+        for client in self.connected_clients:
+            client.sendMessage(json.dumps(message_dict))
 
     def get_message_backlog(self):
         # Returns the last messages; max 20

@@ -12,8 +12,8 @@ class Client(object):
         self.chat_running = True
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((host, port))
-        self.messageWorker = ReceiveMessageWorker(self, self.connection)
-        self.messageWorker.start()
+        self.message_worker = ReceiveMessageWorker(self, self.connection)
+        self.message_worker.start()
         print '\nWelcome to KTN chat; you may now login with "/login <your username>". \
             \n(Type "/help" and press enter for a list of commands.)\n'
 
@@ -86,8 +86,8 @@ class Client(object):
                 timestamp = datetime.now().strftime("%H:%M:%S") # Create timestamp for message
                 requestDict = {"request":"message", "message":data, "timestamp":timestamp}
 
-            requestAsJSON = json.dumps(requestDict)
-            self.connection.sendall(requestAsJSON)
+            request_as_json = json.dumps(requestDict)
+            self.connection.sendall(request_as_json)
 
     def force_disconnect(self):
         pass

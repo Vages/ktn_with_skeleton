@@ -34,8 +34,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         while self.listening:
             data = self.connection.recv(4096).strip()
             if data:
-                decodedData = json.loads(data) # Decode data from JSON
-                request = decodedData["request"] # Check user action
+                decoded_data = json.loads(data) # Decode data from JSON
+                request = decoded_data["request"] # Check user action
                 if self.loggedIn:
                     if request == "login":
                         errorMessage = {'response':'login', 'error':'Already logged in'}
@@ -43,17 +43,17 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                     elif request == "logout":
                         self.logout()
                     elif request == "message":
-                        self.server.broadcastMessage(decodedData, self)
+                        self.server.broadcastMessage(decoded_data, self)
                 else:
                     if request == "login":
-                        attemptedUsername = decodedData["username"]
+                        attemptedUsername = decoded_data["username"]
                         if attemptedUsername in server.getConnectedUsernames(): # Check if username already taken
                             errorMessage = {"response":"login", 'error':'Name already taken.', 'username':attemptedUsername}
                             self.sendMessage(json.dumps(errorMessage))
                         else:
                             if re.match("^[0-9A-Za-z_]{3,10}$", attemptedUsername):
                                 # Username must be 3-10 chars long and consist of only alphanumeric characters
-                                self.username = decodedData["username"]
+                                self.username = decoded_data["username"]
                                 self.loggedIn = True
                                 self.server.addLoggedInClient(self) # Add client to server list of logged in clients
                                 previousMessages = self.server.getMessageBackLog() # Get backlog

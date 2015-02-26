@@ -39,7 +39,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 request = decoded_data["request"] # Check user action
                 if self.logged_in:
                     if request == "login":
-                        error_message = {'response':'login', 'error':'Already logged in'}
+                        error_message = {'response': 'login', 'error': 'Already logged in'}
                         self.send_message(json.dumps(error_message))
                     elif request == "logout":
                         self.logout()

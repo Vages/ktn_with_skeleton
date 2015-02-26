@@ -8,19 +8,15 @@ from datetime import datetime
 
 class Client(object):
 
-    def __init__(self):
-        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    def start(self, host, port):
+    def __init__(self, host, port):
         self.chatRunning = True
+        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((host, port))
         self.messageWorker = ReceiveMessageWorker(self, self.connection)
         self.messageWorker.start()
-
-        # Give user welcome message
         print '\nWelcome to KTN chat; you may now login with "/login <your username>". \
             \n(Type "/help" and press enter for a list of commands.)\n'
-        
+
         while self.chatRunning:
             userInput = raw_input('')
             self.send(userInput)
@@ -101,5 +97,4 @@ class Client(object):
 if __name__ == "__main__":
     SERVERHOST = 'localhost'
     SERVERPORT = 24601
-    client = Client()
-    client.start(SERVERHOST, SERVERPORT)
+    client = Client(SERVERHOST, SERVERPORT)

@@ -47,7 +47,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 else:
                     if request == "login":
                         attemptedUsername = decoded_data["username"]
-                        if attemptedUsername in server.getConnectedUsernames(): # Check if username already taken
+                        if attemptedUsername in server.get_connected_user_names(): # Check if username already taken
                             errorMessage = {"response":"login", 'error':'Name already taken.', 'username':attemptedUsername}
                             self.sendMessage(json.dumps(errorMessage))
                         else:
@@ -56,7 +56,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                                 self.username = decoded_data["username"]
                                 self.loggedIn = True
                                 self.server.addLoggedInClient(self) # Add client to server list of logged in clients
-                                previousMessages = self.server.getMessageBackLog() # Get backlog
+                                previousMessages = self.server.get_message_backlog() # Get backlog
                                 loginMessage = {"response":"login", "username":self.username, "messages":previousMessages}
                                 self.sendMessage(json.dumps(loginMessage))
                             else:
@@ -80,7 +80,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
     def logout(self):
         self.loggedIn = False
-        self.server.removeLoggedInClient(self)
+        self.server.remove_logged_in_client(self)
         logoutMessage = {"response":"logout", "username":self.username}
         self.sendMessage(json.dumps(logoutMessage))
         #self.listening = False
@@ -90,13 +90,15 @@ This will make all Request handlers being called in its own thread.
 Very important, otherwise only one client will be served at a time
 '''
 
+
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
-    def createClientListAndLog(self):
-        self.connectedClients = []
+    def __init__(self, server_address, RequestHandlerClass, bind_and_activate=True):
+        SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate=True)
         self.log = []
+        self.connectedClients = []
 
-    def getConnectedUsernames(self):
+    def get_connected_user_names(self):
         nameList = []
         for client in self.connectedClients:
             nameList.append(client.username) 
@@ -112,17 +114,17 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         for client in self.connectedClients:
             client.sendMessage(jsonDump)
 
-    def addLoggedInClient(self, clientHandler):
+    def addLoggedInClient(self, client_handler):
         # Adds a ClientHandler to the current list of logged in clients
-        self.connectedClients.append(clientHandler)
+        self.connectedClients.append(client_handler)
         # TODO: Send a notification to all logged in clients
-        notification = clientHandler.username + " has logged in."
-        messageDict = {"response":"notification", "message":notification}
+        notification = client_handler.username + " has logged in."
+        message_dict = {"response": "notification", "message": notification}
         for client in self.connectedClients:
-            client.sendMessage(json.dumps(messageDict))
+            client.sendMessage(json.dumps(message_dict))
 
 
-    def removeLoggedInClient(self, clientHandler):
+    def remove_logged_in_client(self, clientHandler):
         # Removes the current client handler from the list of logged in clients.
         # Used to clean up after logout
         self.connectedClients.remove(clientHandler)
@@ -131,7 +133,7 @@ class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         for client in self.connectedClients:
             client.sendMessage(json.dumps(messageDict))
 
-    def getMessageBackLog(self):
+    def get_message_backlog(self):
         # Returns the last messages; max 20
         return self.log[-20:]
 
@@ -141,7 +143,6 @@ if __name__ == "__main__":
     PORT = 24601
 
     server = ThreadedTCPServer((HOST, PORT), ClientHandler)
-    server.createClientListAndLog() #Sets up a list of active clients; kept out of the init
 
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C

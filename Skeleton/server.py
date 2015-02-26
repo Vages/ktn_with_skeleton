@@ -19,12 +19,14 @@ client.
 class ClientHandler(SocketServer.BaseRequestHandler):
 
     def handle(self):
-        # Get a reference to the socket object
-        self.connection = self.request
-        # Get the remote ip adress of the socket
-        self.ip = self.client_address[0]
-        # Get the remote port number of the socket
-        self.port = self.client_address[1]
+        """Overrides superclass' handle method
+
+        :return:
+        """
+
+        self.connection = self.request  # Get a reference to the socket object
+        self.ip = self.client_address[0]  # Get the remote IP address of the socket
+        self.port = self.client_address[1]  # Get the remote port number of the socket
         print 'Client connected @' + self.ip + ':' + str(self.port)
         self.listening = True
 

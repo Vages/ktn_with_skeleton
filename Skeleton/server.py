@@ -5,7 +5,6 @@ for implementing the chat server
 '''
 import SocketServer
 import json
-from threading import Thread
 import re
 
 '''

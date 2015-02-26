@@ -95,6 +95,6 @@ class Client(object):
 
 
 if __name__ == "__main__":
-    SERVERHOST = 'localhost'
-    SERVERPORT = 24601
-    client = Client(SERVERHOST, SERVERPORT)
+    SERVER_HOST = 'localhost'
+    SERVER_PORT = 24601
+    client = Client(SERVER_HOST, SERVER_PORT)

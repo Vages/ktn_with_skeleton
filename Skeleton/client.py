@@ -41,7 +41,7 @@ class Client(object):
         print message_dict['username'] + " @ " + message_dict["timestamp"] + ": " + message_dict["message"]
 
     def message_received(self, message, connection):
-        """Method called by messageworker to print a received message
+        """Method called by message worker to print a received message
 
         :param message: Message in JSON format
         :param connection: The socket that is connected

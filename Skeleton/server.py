@@ -7,16 +7,15 @@ import SocketServer
 import json
 import re
 
-'''
-The RequestHandler class for our server.
-
-It is instantiated once per connection to the server, and must
-override the handle() method to implement communication to the
-client.
-'''
-
 
 class ClientHandler(SocketServer.BaseRequestHandler):
+    """
+    The RequestHandler class for our server.
+
+    It is instantiated once per connection to the server, and must
+    override the handle() method to implement communication to the
+    client.
+    """
 
     def handle(self):
         """Overrides superclass' handle method

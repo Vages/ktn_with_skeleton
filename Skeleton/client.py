@@ -6,9 +6,19 @@ import json
 from MessageWorker import ReceiveMessageWorker
 from datetime import datetime
 
+
 class Client(object):
+    """
+    A client that connects to a server with the specified protocol.
+    """
 
     def __init__(self, host, port):
+        """Initializes a client object.
+
+        :param host: Server host
+        :param port: Server port
+        :return: Client object
+        """
         self.chat_running = True
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((host, port))
@@ -22,11 +32,22 @@ class Client(object):
             self.send(user_input)
 
     def print_message(self, message_dict):
+        """Prints a received message.
+
+        :param message_dict: The message in dict form
+        :return:
+        """
         # Print received message with timestamp
         print message_dict['username'] + " @ " + message_dict["timestamp"] + ": " + message_dict["message"]
 
     def message_received(self, message, connection):
-        decodedMessage = json.loads(message)
+        """Method called by messageworker to print a received message
+
+        :param message: Message in JSON format
+        :param connection: The socket that is connected
+        :return:
+        """
+        decoded_message = json.loads(message)
         try:
             error = decodedMessage['error'] # Print an error if present
             print "SERVER ERROR: " + error

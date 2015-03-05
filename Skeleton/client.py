@@ -7,6 +7,8 @@ from MessageWorker import ReceiveMessageWorker
 from datetime import datetime
 
 
+"""Hei, jeg er en mann"""
+
 class Client(object):
     """
     A client that connects to a server with the specified protocol.
@@ -129,6 +131,8 @@ class Client(object):
         pass
         #self.connection_closed(self.connection)
 
+
+"""Dette er selve programmet"""
 
 if __name__ == "__main__":
     SERVER_HOST = 'localhost'
